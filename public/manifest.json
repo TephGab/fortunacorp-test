@@ -1,0 +1,17 @@
+{
+    "name": "Fortuna Corporation",
+    "short_name": "Fortuna Corp",
+    "start_url": "/index.php",
+    "background_color": "#0DCAF0",
+    "description": "Fortuna Corporation application",
+    "display": "standalone",
+    "theme_color": "#0DCAF0",
+    "icons": [
+        {
+            "src": "/img/logo/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
