@@ -54,9 +54,9 @@ class LoginController extends Controller
         //event(new UserOnlineStatusUpdated($user->id, 'offline'));
 
         // Dispatch job to assign transactions after logout
-        // if ($user->hasRole('operator')) {
-        //     DispatchTransactions::dispatch($user->id);
-        // }
+        if ($user->hasRole('operator')) {
+            DispatchTransactions::dispatch($user->id);
+        }
         // Log the user out
         Auth::logout();
         return redirect('/'); // Replace with your desired redirection URL after logout.
