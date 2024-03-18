@@ -34,31 +34,32 @@ class DispatchTransactions implements ShouldQueue
      */
     public function handle()
     {
-        // Retrieve all pending transactions for the current user
-        $transactions = Transaction::where('operator_id', $this->userId)->where('status', 'pending')->where('operation', 'transfert_si')->get();
+        $user = User::findOrFail($this->userId);
+        if ($user->hasRole('operator')) {
+            // Retrieve all pending transactions for the current user
+            $transactions = Transaction::where('operator_id', $this->userId)->where('status', 'pending')->where('operation', 'transfert_si')->get();
 
-        if($transactions){
-            foreach ($transactions as $transaction) { 
-                //Retreive Operator
-                $operator = User::leftJoin('transactions', function ($join) {
-                    $join->on('users.id', '=', 'transactions.operator_id')
-                    ->where('transactions.operator_id', '!=', null);
-                })->select('users.id')
-                    ->where('online_status', '=', 'online')
-                    ->orWhere(function ($query) {
-                    $query->groupBy('users.id')->havingRaw('COUNT(transactions.id) >= 0');
-                })->whereHas('roles', function ($query) {
-                    $query->where('name', 'operator');
-                })->orderByRaw('(SELECT COUNT(transactions.id) FROM transactions WHERE transactions.operator_id = users.id AND transactions.status = "pending") ASC')->first();
-                
-                if($operator){
-                    $transaction->update(['operator_id' => $operator->id]);
-                }else{
-                    $transaction->update(['operator_id' => 1]);
+            if ($transactions) {
+                foreach ($transactions as $transaction) {
+                    //Retreive Operator
+                    $operator = User::leftJoin('transactions', function ($join) {
+                        $join->on('users.id', '=', 'transactions.operator_id')
+                            ->where('transactions.operator_id', '!=', null);
+                    })->select('users.id')
+                        ->where('online_status', '=', 'online')
+                        ->orWhere(function ($query) {
+                            $query->groupBy('users.id')->havingRaw('COUNT(transactions.id) >= 0');
+                        })->whereHas('roles', function ($query) {
+                            $query->where('name', 'operator');
+                        })->orderByRaw('(SELECT COUNT(transactions.id) FROM transactions WHERE transactions.operator_id = users.id AND transactions.status = "pending") ASC')->first();
+
+                    if ($operator) {
+                        $transaction->update(['operator_id' => $operator->id]);
+                    } else {
+                        $transaction->update(['operator_id' => 1]);
+                    }
                 }
             }
         }
-
-
     }
 }

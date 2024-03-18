@@ -35,10 +35,16 @@ class AssignTransactions implements ShouldQueue
      */
     public function handle()
     {
-        $transactions = Transaction::where('operator_id', 1)->where('status', 'pending')->get();
+        $user = User::findOrFail($this->userId);
 
-        foreach ($transactions as $transaction) {
-            $transaction->update(['operator_id' => $this->userId]);
+        if ($user->hasRole('operator')) {
+            $transactions = Transaction::where('operator_id', 1)->where('status', 'pending')->get();
+
+            foreach ($transactions as $transaction) {
+                $transaction->update(['operator_id' => $this->userId]);
+            }
+        }else{
+            //
         }
     }
 }
